@@ -1,5 +1,7 @@
 ## ⚠️ Disclaimer
-I haven't been supporting the library for a long time, and if someone wants to take responsibility over it, contact me, please.
+I just found this library, updated it to also support Python 3 and updated terminal-notifier to version 1.7.1. At the moment I have no intention to support the library.
+
+But it was fun to fiddle around a bit and learn about Travis CI. :)
 
 
 pync
@@ -13,17 +15,17 @@ Installation
 ------------
 
 ```
-pip install pync
+pip install git+https://github.com/jasperges/pync.git
 ```
 or
 ```
-pip install git+https://github.com/SeTeM/pync.git
-```
-or
-```
-git clone git://github.com/SeTeM/pync.git
+git clone git://github.com/jasperges/pync.git
 cd pync
 python setup.py install
+```
+or for the older versions by SeTeM:
+```
+pip install pync
 ```
 
 Usage
