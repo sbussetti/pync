@@ -51,18 +51,19 @@ pync.list_notifications(os.getpid())
 
 Using the notifier object
 ```python
-from pync import Notifier
+from pync import TerminalNotifier
 
-Notifier.notify('Hello World')
-Notifier.notify('Hello World', title='Python')
-Notifier.notify('Hello World', group=os.getpid())
-Notifier.notify('Hello World', activate='com.apple.Safari')
-Notifier.notify('Hello World', open='http://github.com/')
-Notifier.notify('Hello World', execute='say "OMG"')
+notifier = TerminalNotifier()
+notifier.notify('Hello World')
+notifier.notify('Hello World', title='Python')
+notifier.notify('Hello World', group=os.getpid())
+notifier.notify('Hello World', activate='com.apple.Safari')
+notifier.notify('Hello World', open='http://github.com/')
+notifier.notify('Hello World', execute='say "OMG"')
 
-Notifier.remove(os.getpid())
+notifier.remove(os.getpid())
 
-Notifier.list(os.getpid())
+notifier.list(os.getpid())
 ```
 
 

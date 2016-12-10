@@ -41,6 +41,7 @@ class TerminalNotifier(object):
             os.chmod(self.bin_path, 111)
             if not os.access(self.bin_path, os.X_OK):
                 raise Exception("You have no privileges to execute \"%s\"" % self.bin_path)
+        self.wait = False
 
     def notify(self, message, **kwargs):
         """
@@ -53,19 +54,19 @@ class TerminalNotifier(object):
 
         Examples are:
 
-          Notifier = TerminalNotifier()
+          notifier = TerminalNotifier()
 
-          Notifier.notify('Hello World')
-          Notifier.notify('Hello World', title='Python')
-          Notifier.notify('Hello World', sound='Ping')
-          Notifier.notify('Hello World', group=os.getpid())
-          Notifier.notify('Hello World', activate='com.apple.Safari')
-          Notifier.notify('Hello World', open='http://github.com/')
-          Notifier.notify('Hello World', execute='say "OMG"')
+          notifier.notify('Hello World')
+          notifier.notify('Hello World', title='Python')
+          notifier.notify('Hello World', sound='Ping')
+          notifier.notify('Hello World', group=os.getpid())
+          notifier.notify('Hello World', activate='com.apple.Safari')
+          notifier.notify('Hello World', open='http://github.com/')
+          notifier.notify('Hello World', execute='say "OMG"')
 
-          The options `wait` is a boolean for whether or not we need to wait (block) for the background process to finish
+          The options `wait` is a boolean for whether or not we need to
+          wait (block) for the background process to finish
         """
-        
         message = message.encode('utf-8')
 
         self.wait = kwargs.pop('wait', False)
@@ -77,7 +78,11 @@ class TerminalNotifier(object):
 
     def execute(self, args):
         args = [str(arg) for arg in args]
-        output = subprocess.Popen([self.bin_path, ] + args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = subprocess.Popen(
+            [self.bin_path, ] + args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            )
 
         if self.wait:
             output.wait()
@@ -130,8 +135,6 @@ class TerminalNotifier(object):
         return int(major) > 10 or int(minor) >= 8
 
 
-Notifier = TerminalNotifier()
-
 
 def notify(message, **kwargs):
     """
@@ -156,7 +159,8 @@ def notify(message, **kwargs):
 
       The options `wait` is a boolean for whether or not we need to wait (block) for the background process to finish
     """
-    Notifier.notify(message, **kwargs)
+    notifier = TerminalNotifier()
+    notifier.notify(message, **kwargs)
 
 
 def remove_notifications(group="ALL"):
@@ -166,10 +170,11 @@ def remove_notifications(group="ALL"):
 
     If no ‘group’ ID is given, all notifications are removed.
     """
-    return Notifier.execute(["-remove", group])
+    notifier = TerminalNotifier()
+    return notifier.execute(["-remove", group])
 
 
-def list_notifications(self, group="ALL"):
+def list_notifications(group="ALL"):
     """
     If a ‘group’ ID is given, and a notification for that group exists,
     returns a dict with details about the notification.
@@ -179,8 +184,16 @@ def list_notifications(self, group="ALL"):
 
     If no information is available this will return [].
     """
-    return Notifier.list(group)
+    notifier = TerminalNotifier()
+    return notifier.list(group)
+
+
+def main():
+    """Show a test notification."""
+    notifier = TerminalNotifier()
+    notifier.notify("Notification from {0}".format(__file__),
+                    open="http://github.com")
 
 
 if __name__ == '__main__':
-    Notifier.notify("Notification from %s" % __file__, open="http://github.com")
+    main()
