@@ -17,13 +17,13 @@ for root, dirs, files in os.walk('pync/vendor/'):
         terminal_notifier_files.append(os.path.join(root, f))
 
 setup(name = 'pync',
-    version = "1.6.1",
+    version = "1.7.1",
     description = 'Python Wrapper for Mac OS 10.8 Notification Center',
     long_description = long_description,
-    author = 'Vladislav Syabruk',
-    author_email = 'sjabrik@gmail.com',
-    url = 'https://github.com/setem/pync',
-    download_url = 'https://github.com/SeTeM/pync/archive/v1.6.1.zip',
+    author = 'Vladislav Syabruk, Jasper van Nieuwenhuizen',
+    author_email = 'jaspervannieuwenhuizen@gmail.com',
+    url = 'https://github.com/jasperges/pync',
+    download_url = 'https://github.com/jasperges/pync/archive/v1.7.1.zip',
     license = "MIT",
     platforms = "MacOS X",
     keywords = "mac notification center wrapper",
