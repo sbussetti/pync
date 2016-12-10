@@ -4,13 +4,12 @@
 import os
 import platform
 import subprocess
+import json
 from dateutil.parser import parse
-
-LIST_FIELDS = ["group", "title", "subtitle", "message", "delivered_at"]
 
 
 class TerminalNotifier(object):
-    TERMINAL_NOTIFIER_VERSION = "1.6.1"
+    TERMINAL_NOTIFIER_VERSION = "1.7.1"
 
     def __init__(self):
         """
@@ -67,12 +66,12 @@ class TerminalNotifier(object):
           The options `wait` is a boolean for whether or not we need to
           wait (block) for the background process to finish
         """
-        message = message.encode('utf-8')
+        message = message.encode('utf-8').decode()
 
         self.wait = kwargs.pop('wait', False)
 
         args = ['-message', message]
-        args += [a for b in [("-%s" % arg, str(key)) for arg, key in kwargs.items()] for a in b]  # flatten list
+        args += [a for b in [("-{arg}".format(arg=arg) , str(key)) for arg, key in kwargs.items()] for a in b]  # flatten list
 
         return self.execute(args)
 
@@ -109,17 +108,17 @@ class TerminalNotifier(object):
         If no ‘group’ ID is given, an array of hashes describing all
         notifications.
 
-        If no information is available this will return [].
+        If no information is available this will return None.
         """
 
-        output = self.execute(["-list", group]).communicate()[0]
-        res = list()
-
-        for line in output.splitlines()[1:]:
-            res.append(dict(zip(LIST_FIELDS, line.split("\t"))))
+        output = self.execute(["-list", group, "-json"]).communicate()[0].decode()
+        if not output:
+            return
+        res = json.loads(output)
+        for message in res:
             try:
-                res[-1]["delivered_at"] = parse(res[-1]["delivered_at"])
-            except ValueError:
+                message["deliveredAt"] = parse(message["deliveredAt"])
+            except (KeyError, ValueError):
                 pass
 
         return res

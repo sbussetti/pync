@@ -1,3 +1,3 @@
-__version__ = "1.6.1"
+__version__ = "1.7.1"
 
-from .TerminalNotifier import TerminalNotifier, notify
+from .terminal_notifier import TerminalNotifier, notify
