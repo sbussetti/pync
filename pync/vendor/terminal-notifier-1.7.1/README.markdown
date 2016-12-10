@@ -6,21 +6,28 @@ which are available in Mac OS X 10.8 and higher.
 
 ## Caveats
 
-* The Notification Center _always_ uses the application’s own icon, there’s
-  currently no way to specify a custom icon for a notification. The only way to
-  use this tool with your own icon is to use the `-sender` option or include a
-  build of terminal-notifier with your icon and bundle identifier instead.
-
-  However, you _can_ use unicode symbols and emojis. See the examples.
+* Under OS X 10.8, the Notification Center _always_ uses the application’s own
+  icon, there’s currently no way to specify a custom icon for a notification. The only
+  way to use this tool with your own icon is to use the `-sender` option or include a
+  build of terminal-notifier with your icon and **a different bundle identifier**
+  instead. (If you do not change the bundle identifier, launch services will use
+  a cached version of the icon.)
+  <br/>Consequently the `-appIcon` & `-contentImage` options aren't doing anything
+  under 10.8.
+  <br/>However, you _can_ use unicode symbols and emojis. See the examples.
 
 * It is currently packaged as an application bundle, because `NSUserNotification`
   does not work from a ‘Foundation tool’. [radar://11956694](radar://11956694)
+
+* If you intend to package terminal-notifier with your app to distribute it on the
+  MAS, please use 1.5.2 since 1.6.0+ uses a private method override which is not
+  allowed in the AppStore guidelines.
 
 
 ## Download
 
 Prebuilt binaries are available from the
-[releases section](https://github.com/alloy/terminal-notifier/releases).
+[releases section](https://github.com/julienXX/terminal-notifier/releases).
 
 Or if you want to use this from
 [Ruby](https://github.com/alloy/terminal-notifier/tree/master/Ruby), you can
@@ -30,6 +37,10 @@ install it through RubyGems:
 $ [sudo] gem install terminal-notifier
 ```
 
+You can also install it via [Homebrew](https://github.com/Homebrew/homebrew):
+```
+$ brew install terminal-notifier
+```
 
 ## Usage
 
@@ -51,9 +62,28 @@ This will obviously be a bit slower than using the tool without the wrapper.
 
 Some examples are:
 
+Display piped data with a sound
 ```
 $ echo 'Piped Message Data!' | terminal-notifier -sound default
+```
+
+Multiple actions and custom dropdown list
+```
+$ terminal-notifier -message "Deploy now on UAT ?" -actions Now,"Later today","Tomorrow" -dropdownLabel "When ?"
+```
+
+Yes or No ?
+```
+$ terminal-notifier -title ProjectX -subtitle "new tag detected" -message "Deploy now on UAT ?" -closeLabel No -actions Yes -appIcon http://vjeantet.fr/images/logo.png
+```
+
+Open an URL when the notification is clicked
+```
 $ terminal-notifier -title '💰' -message 'Check your Apple stock!' -open 'http://finance.yahoo.com/q?s=AAPL'
+```
+
+Open an app when the notification is clicked
+```
 $ terminal-notifier -group 'address-book-sync' -title 'Address Book Sync' -subtitle 'Finished' -message 'Imported 42 contacts.' -activate 'com.apple.AddressBook'
 ```
 
@@ -61,7 +91,7 @@ $ terminal-notifier -group 'address-book-sync' -title 'Address Book Sync' -subti
 #### Options
 
 At a minimum, you have to specify either the `-message` , the `-remove`
-option or the `-list` option.
+or the `-list` option.
 
 -------------------------------------------------------------------------------
 
@@ -83,6 +113,53 @@ The title of the notification. This defaults to ‘Terminal’.
 `-subtitle VALUE`
 
 The subtitle of the notification.
+
+-------------------------------------------------------------------------------
+
+`-sound NAME`
+
+The name of a sound to play when the notification appears. The names are listed
+in Sound Preferences. Use 'default' for the default notification sound.
+
+-------------------------------------------------------------------------------
+
+`-reply` **[10.9+ only]**
+
+The notification will be displayed as a reply type alert.
+
+-------------------------------------------------------------------------------
+
+`-actions VALUE1,VALUE2,"VALUE 3"` **[10.9+ only]**
+
+The notification actions avalaible.
+When you provide more than one value, a dropdown will be displayed.
+You can customize this dropdown label with the next option
+Does not work when -reply is used
+
+-------------------------------------------------------------------------------
+
+`-dropdownLabel VALUE` **[10.9+ only]**
+
+The notification actions dropdown title (only when multiples -actions values are provided).
+Does not work when -reply is used
+
+-------------------------------------------------------------------------------
+
+`-closeLabel VALUE` **[10.9+ only]**
+
+The notification "Close" button label.
+
+-------------------------------------------------------------------------------
+
+`-timeout NUMBER`
+
+Auto close the alert notification after NUMBER seconds.
+
+-------------------------------------------------------------------------------
+
+`-json`
+
+Outputs the event as JSON.
 
 -------------------------------------------------------------------------------
 
@@ -138,7 +215,29 @@ Examples are:
 Specifying this will make it appear as if the notification was send by that
 application instead, including using its icon.
 
+Using this option fakes the sender application, so that the notification system
+will launch that application when the notification is clicked. Because of this
+it is important to note that you cannot combine this with options like
+`-execute`, `-open`, and `-activate` which depend on the sender of the
+notification to be ‘terminal-notifier’ to perform its work.
+
 For information on the `ID` see the `-activate` option.
+
+-------------------------------------------------------------------------------
+
+`-appIcon PATH` **[10.9+ only]**
+
+Specifies The PATH of an image to display instead of the application icon.
+
+**WARNING: This option is subject to change since it relies on a private method.**
+
+-------------------------------------------------------------------------------
+
+`-contentImage PATH` **[10.9+ only]**
+
+Specifies The PATH of an image to display attached inside the notification.
+
+**WARNING: This option is subject to change since it relies on a private method.**
 
 -------------------------------------------------------------------------------
 
@@ -160,7 +259,8 @@ All the works are available under the MIT license. **Except** for
 ‘Terminal.icns’, which is a copy of Apple’s Terminal.app icon and as such is
 copyright of Apple.
 
-Copyright (C) 2012-2013 Eloy Durán <eloy.de.enige@gmail.com>
+Copyright (C) 2012-2016 Eloy Durán <eloy.de.enige@gmail.com>, Julien Blanchard
+<julien@sideburns.eu>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
