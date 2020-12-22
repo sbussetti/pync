@@ -2,13 +2,19 @@
 # -*- coding: utf-8 -*-
 
 import os
+import codecs
 from setuptools import setup, find_packages
 
-file_contents = []
-for file_name in ('README.md',):
-    path = os.path.join(os.path.dirname(__file__), file_name)
-    file_contents.append(open(path).read())
-long_description = '\n\n'.join(file_contents)
+
+here = os.path.abspath(os.path.dirname(__file__))
+
+readme_file = os.path.join(here, 'README.md')
+try:
+    from m2r import parse_from_file
+    long_description = parse_from_file(readme_file)
+except ImportError:
+    with codecs.open(readme_file, encoding='utf-8') as f:
+        long_description = f.read()
 
 terminal_notifier_files = []
 for root, dirs, files in os.walk('pync/vendor/'):
@@ -17,13 +23,12 @@ for root, dirs, files in os.walk('pync/vendor/'):
         terminal_notifier_files.append(os.path.join(root, f))
 
 setup(name = 'pync',
-    version = "1.7.1",
-    description = 'Python Wrapper for Mac OS 10.8 Notification Center',
+    version = "2.0.4",
+    description = 'Python Wrapper for Mac OS 10.10 Notification Center',
     long_description = long_description,
-    author = 'Vladislav Syabruk, Jasper van Nieuwenhuizen',
-    author_email = 'jaspervannieuwenhuizen@gmail.com',
-    url = 'https://github.com/jasperges/pync',
-    download_url = 'https://github.com/jasperges/pync/archive/v1.7.1.zip',
+    author = 'Vladislav Syabruk',
+    author_email = 'sjabrik@gmail.com',
+    url = 'https://github.com/setem/pync',
     license = "MIT",
     platforms = "MacOS X",
     keywords = "mac notification center wrapper",
@@ -34,6 +39,15 @@ setup(name = 'pync',
     ],
     packages = find_packages(),
     classifiers = [
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Console',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Environment :: MacOS X',
+        'Topic :: Terminals',
         'Topic :: Utilities',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ]

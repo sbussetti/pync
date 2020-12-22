@@ -1,39 +1,36 @@
-## ⚠️ Disclaimer
-I just found this library, updated it to also support Python 3 and updated terminal-notifier to version 1.7.1. At the moment I have no intention to support the library.
+# pync
+[![PyPI - License](https://img.shields.io/pypi/l/pync.svg)](https://github.com/SeTeM/pync/blob/master/LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/pync.svg)](https://pypi.org/project/pync/)
+![GitHub issues](https://img.shields.io/github/issues-raw/SeTeM/pync.svg)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/SeTeM/pync.svg)
+[![GitHub forks](https://img.shields.io/github/forks/SeTeM/pync.svg?style=social&label=Fork)](https://github.com/SeTeM/pync)
+[![GitHub stars](https://img.shields.io/github/stars/SeTeM/pync.svg?style=social&label=Stars)](https://github.com/SeTeM/pync)
 
-But it was fun to fiddle around a bit and learn about Travis CI. :)
-
-
-pync
-====
-
-A simple Python wrapper around the [`terminal-notifier`][HOMEPAGE] command-line tool (version 1.7.1), which allows you to send User Notifications to the Notification Center on Mac OS X 10.8, or higher.
+A simple Python wrapper around the [terminal-notifier][HOMEPAGE] command-line tool (version 2.0.0), which allows you to send User Notifications to the Notification Center on Mac OS X 10.10, or higher.
 
 ![Screenshot](http://f.cl.ly/items/1k051n3k0u0i101m1i0U/Screen%20Shot%202012-08-24%20at%2012.20.40%20PM.png)
 
-Installation
-------------
+### Installation
 
-```
-pip install git+https://github.com/jasperges/pync.git
+```bash
+pip install pync
 ```
 or
+```bash
+pip install git+https://github.com/SeTeM/pync.git
 ```
-git clone git://github.com/jasperges/pync.git
+or
+```bash
+git clone git://github.com/SeTeM/pync.git
 cd pync
 python setup.py install
 ```
-or for the older versions by SeTeM:
-```
-pip install pync
-```
 
-Usage
------
+### Usage
 
 For full information on all the options, see the tool’s [README][README].
 
-### Examples:
+#### Examples:
 
 Using the notify function
 ```python
@@ -45,6 +42,7 @@ pync.notify('Hello World', group=os.getpid())
 pync.notify('Hello World', activate='com.apple.Safari')
 pync.notify('Hello World', open='http://github.com/')
 pync.notify('Hello World', execute='say "OMG"')
+pync.notify('Hello World', appIcon='https://assets-cdn.github.com/images/modules/logos_page/Octocat.png')
 
 pync.remove_notifications(os.getpid())
 
@@ -53,24 +51,23 @@ pync.list_notifications(os.getpid())
 
 Using the notifier object
 ```python
-from pync import TerminalNotifier
+from pync import Notifier
 
-notifier = TerminalNotifier()
-notifier.notify('Hello World')
-notifier.notify('Hello World', title='Python')
-notifier.notify('Hello World', group=os.getpid())
-notifier.notify('Hello World', activate='com.apple.Safari')
-notifier.notify('Hello World', open='http://github.com/')
-notifier.notify('Hello World', execute='say "OMG"')
+Notifier.notify('Hello World')
+Notifier.notify('Hello World', title='Python')
+Notifier.notify('Hello World', group=os.getpid())
+Notifier.notify('Hello World', activate='com.apple.Safari')
+Notifier.notify('Hello World', open='http://github.com/')
+Notifier.notify('Hello World', execute='say "OMG"')
+Notifier.notify('Hello World', appIcon='https://assets-cdn.github.com/images/modules/logos_page/Octocat.png')
 
-notifier.remove(os.getpid())
+Notifier.remove(os.getpid())
 
-notifier.list(os.getpid())
+Notifier.list(os.getpid())
 ```
 
 
-License
--------
+### License
 
 All the works are available under the MIT license. **Except** for ‘Terminal.icns’, which is a copy of Apple’s Terminal.app icon and as such is copyright of Apple.
 

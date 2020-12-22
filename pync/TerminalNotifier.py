@@ -4,18 +4,22 @@
 import os
 import platform
 import subprocess
-import json
+import sys
+
 from dateutil.parser import parse
+
+LIST_FIELDS = ["group", "title", "subtitle", "message", "delivered_at", "appIcon"]
 
 
 class TerminalNotifier(object):
-    TERMINAL_NOTIFIER_VERSION = "1.7.1"
+    TERMINAL_NOTIFIER_VERSION = "2.0.0"
 
-    def __init__(self):
+    def __init__(self, wait=False):
         """
         Raises an exception if not supported on the current platform or
         if terminal-notifier was not found.
         """
+        self._wait = wait
         proc = subprocess.Popen(["which", "terminal-notifier"], stdout=subprocess.PIPE)
         env_bin_path = proc.communicate()[0].strip()
         if env_bin_path and os.path.exists(env_bin_path):
@@ -40,7 +44,6 @@ class TerminalNotifier(object):
             os.chmod(self.bin_path, 111)
             if not os.access(self.bin_path, os.X_OK):
                 raise Exception("You have no privileges to execute \"%s\"" % self.bin_path)
-        self.wait = False
 
     def notify(self, message, **kwargs):
         """
@@ -53,37 +56,34 @@ class TerminalNotifier(object):
 
         Examples are:
 
-          notifier = TerminalNotifier()
+          Notifier = TerminalNotifier()
 
-          notifier.notify('Hello World')
-          notifier.notify('Hello World', title='Python')
-          notifier.notify('Hello World', sound='Ping')
-          notifier.notify('Hello World', group=os.getpid())
-          notifier.notify('Hello World', activate='com.apple.Safari')
-          notifier.notify('Hello World', open='http://github.com/')
-          notifier.notify('Hello World', execute='say "OMG"')
+          Notifier.notify('Hello World')
+          Notifier.notify('Hello World', title='Python')
+          Notifier.notify('Hello World', sound='Ping')
+          Notifier.notify('Hello World', group=os.getpid())
+          Notifier.notify('Hello World', activate='com.apple.Safari')
+          Notifier.notify('Hello World', open='http://github.com/')
+          Notifier.notify('Hello World', execute='say "OMG"')
 
-          The options `wait` is a boolean for whether or not we need to
-          wait (block) for the background process to finish
+          The options `wait` is a boolean for whether or not we need to wait (block) for the background process to finish
         """
-        message = message.encode('utf-8').decode()
 
-        self.wait = kwargs.pop('wait', False)
+        if sys.version_info < (3,):
+            message = message.encode('utf-8', 'replace')
+
+        self._wait = kwargs.pop('wait', False)
 
         args = ['-message', message]
-        args += [a for b in [("-{arg}".format(arg=arg) , str(key)) for arg, key in kwargs.items()] for a in b]  # flatten list
+        args += [a for b in [("-%s" % arg, str(key)) for arg, key in kwargs.items()] for a in b]  # flatten list
 
         return self.execute(args)
 
     def execute(self, args):
         args = [str(arg) for arg in args]
-        output = subprocess.Popen(
-            [self.bin_path, ] + args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            )
+        output = subprocess.Popen([self.bin_path, ] + args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
-        if self.wait:
+        if self._wait:
             output.wait()
 
         if output.returncode:
@@ -108,17 +108,17 @@ class TerminalNotifier(object):
         If no ‘group’ ID is given, an array of hashes describing all
         notifications.
 
-        If no information is available this will return None.
+        If no information is available this will return [].
         """
 
-        output = self.execute(["-list", group, "-json"]).communicate()[0].decode()
-        if not output:
-            return
-        res = json.loads(output)
-        for message in res:
+        output = self.execute(["-list", group]).communicate()[0]
+        res = list()
+
+        for line in output.splitlines()[1:]:
+            res.append(dict(zip(LIST_FIELDS, line.decode().split("\t"))))
             try:
-                message["deliveredAt"] = parse(message["deliveredAt"])
-            except (KeyError, ValueError):
+                res[-1]["delivered_at"] = parse(res[-1]["delivered_at"])
+            except ValueError:
                 pass
 
         return res
@@ -133,6 +133,8 @@ class TerminalNotifier(object):
 
         return int(major) > 10 or int(minor) >= 8
 
+
+Notifier = TerminalNotifier()
 
 
 def notify(message, **kwargs):
@@ -158,8 +160,7 @@ def notify(message, **kwargs):
 
       The options `wait` is a boolean for whether or not we need to wait (block) for the background process to finish
     """
-    notifier = TerminalNotifier()
-    notifier.notify(message, **kwargs)
+    Notifier.notify(message, **kwargs)
 
 
 def remove_notifications(group="ALL"):
@@ -169,11 +170,10 @@ def remove_notifications(group="ALL"):
 
     If no ‘group’ ID is given, all notifications are removed.
     """
-    notifier = TerminalNotifier()
-    return notifier.execute(["-remove", group])
+    return Notifier.execute(["-remove", group])
 
 
-def list_notifications(group="ALL"):
+def list_notifications(self, group="ALL"):
     """
     If a ‘group’ ID is given, and a notification for that group exists,
     returns a dict with details about the notification.
@@ -183,16 +183,13 @@ def list_notifications(group="ALL"):
 
     If no information is available this will return [].
     """
-    notifier = TerminalNotifier()
-    return notifier.list(group)
-
-
-def main():
-    """Show a test notification."""
-    notifier = TerminalNotifier()
-    notifier.notify("Notification from {0}".format(__file__),
-                    open="http://github.com")
+    return Notifier.list(group)
 
 
 if __name__ == '__main__':
-    main()
+    Notifier.notify(
+        "Notification from %s" % __file__,
+        title='pync Notification',
+        open='https://github.com/SeTeM/pync',
+        appIcon='https://assets-cdn.github.com/images/modules/logos_page/Octocat.png'
+    )
